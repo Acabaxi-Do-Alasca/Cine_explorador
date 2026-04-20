@@ -1,0 +1,114 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Cine Explorador</title>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <link rel="stylesheet" href="css/style.css">
+</head>
+<body>
+    <div class="container">
+        <h1><i class="fas fa-shuffle"></i>Cine Explorador</h1>
+        
+        <div class="tabs">
+            <button class="tab-btn active" id="btn-trending" onclick="switchTab('trending')">Em Alta</button>
+            <button class="tab-btn" id="btn-sort" onclick="switchTab('sort')">Sortear</button>
+            <button class="tab-btn" id="btn-search" onclick="switchTab('search')">Filmes</button>
+            <button class="tab-btn" id="btn-actors" onclick="switchTab('actors')">Atores</button>
+        </div>
+
+        <div id="sortPanel" class="panel">
+            <div class="section-label"><i class="fas fa-tags"></i> Escolha os Gêneros</div>
+            <div id="genres" class="genres"></div>
+            <div style="margin-top: 25px; display: flex; justify-content: center;">
+                <button class="main-btn" onclick="sortear()"><i class="fas fa-shuffle"></i> Sortear Agora</button>
+            </div>
+        </div>
+
+        <div id="searchPanel" class="panel">
+            <div class="search-box">
+                <input type="text" id="query" placeholder="Buscar filmes..." onkeyup="if(event.key==='Enter'){ currentSearchPage=1; searchMovies(); }">
+                <button class="main-btn" onclick="currentSearchPage=1; searchMovies()"><i class="fas fa-search"></i> Buscar</button>
+            </div>
+            <div id="searchResults" class="results-list"></div>
+            <div id="loadMoreSearch" class="load-more" style="display:none">
+                <button class="load-more-btn" onclick="searchMovies(true)">Carregar Mais</button>
+            </div>
+        </div>
+
+        <div id="actorsPanel" class="panel">
+            <div class="search-box">
+                <input type="text" id="actorQuery" placeholder="Buscar atores e atrizes..." onkeyup="if(event.key==='Enter'){ currentActorPage=1; searchActors(); }">
+                <button class="main-btn" onclick="currentActorPage=1; searchActors()"><i class="fas fa-user"></i> Buscar</button>
+            </div>
+            <div id="actorResults" class="results-list"></div>
+            <div id="loadMoreActors" class="load-more" style="display:none">
+                <button class="load-more-btn" onclick="searchActors(true)">Carregar Mais</button>
+            </div>
+        </div>
+
+        <div id="trendingPanel" class="panel active">
+            <div id="trendingResults" class="results-list"></div>
+            <div class="load-more">
+                <button class="load-more-btn" onclick="loadTrending(true)">Carregar Mais Filmes</button>
+            </div>
+        </div>
+
+        <div id="movieCard" class="movie-card">
+            <div class="close-card" onclick="closeMovie()"><i class="fas fa-times"></i></div>
+            <div class="movie-content">
+                <div class="poster-wrap" id="posterWrap"></div>
+                <div class="movie-info">
+                    <h2 id="movieTitle" class="movie-title"></h2>
+                    <div class="meta">
+                        <span id="movieRating" class="meta-item"></span>
+                        <span id="movieYear" class="meta-item"></span>
+                        <div id="movieGenres" style="display:contents"></div>
+                    </div>
+                    
+                    <div id="movieStatus" style="margin-bottom: 25px;"></div>
+
+                    <div style="margin-bottom: 25px;">
+                        <a id="tmdbLink" href="#" target="_blank" class="meta-item" style="text-decoration:none; font-size:0.75rem"><i class="fas fa-external-link-alt"></i> Ver no TMDB</a>
+                    </div>
+
+                    <div class="section-label"><i class="fas fa-align-left"></i> Sinopse</div>
+                    <p id="movieOverview" class="overview"></p>
+
+                    <div id="castSection">
+                        <div class="section-label"><i class="fas fa-users"></i> Elenco Principal</div>
+                        <div id="movieCast" class="cast-list"></div>
+                    </div>
+
+                    <div id="watchSection">
+                        <div class="section-label"><i class="fas fa-play-circle"></i> Onde Assistir (Brasil)</div>
+                        <div id="watchProviders" class="watch-providers"></div>
+                    </div>
+
+                    <div id="similarSection">
+                        <div class="section-label"><i class="fas fa-film"></i> Filmes Similares</div>
+                        <div id="similarMovies" class="similar-movies"></div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <div id="portfolioModal">
+            <div class="modal-content">
+                <span class="close-modal" onclick="closePortfolio()">×</span>
+                <div id="actorInfo" class="actor-header"></div>
+                <div class="section-label"><i class="fas fa-star"></i> Principais Filmes</div>
+                <div id="portfolioGrid" class="portfolio-grid"></div>
+            </div>
+        </div>
+
+        <footer>
+            <p>Cine Explorador © 2026 | Dados do TMDB</p>
+            <img src="https://www.themoviedb.org/assets/2/v4/logos/v2/blue_square_1-5bdc4501308a3d3c74384a39031d9990b719001382451f2f811b51152a537f88.svg" alt="TMDB Logo">
+        </footer>
+    </div>
+
+    <script src="js/main.js"></script>
+</body>
+</html>
