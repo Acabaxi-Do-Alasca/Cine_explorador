@@ -231,7 +231,7 @@ async function showActorPortfolio(id, name, pic) {
         div.className = 'portfolio-item';
         div.innerHTML = `<img src="${role.poster_path ? IMG + role.poster_path : 'img/404.png'}"><p>${role.title}</p>`;
         div.onclick = () => { closePortfolio(); showMovie(role.id); };
-        grid.appendChild(divgrid.appendChild(div));
+        grid.appendChild(div);
     });
     modal.style.display = 'block';
     document.body.style.overflow = 'hidden';
