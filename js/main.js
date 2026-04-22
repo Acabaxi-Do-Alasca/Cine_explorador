@@ -102,7 +102,8 @@ async function sortear() {
 }
 
 async function showMovie(id) {
-    const m = await fetchTMDB(`/movie/${id}`, { language: 'pt-BR', append_to_response: 'watch/providers,similar,credits' });
+    // Adicionado "videos" no append_to_response
+    const m = await fetchTMDB(`/movie/${id}`, { language: 'pt-BR', append_to_response: 'watch/providers,similar,credits,videos' });
     const card = document.getElementById('movieCard');
     card.style.display = 'block';
     
@@ -128,6 +129,27 @@ async function showMovie(id) {
     } else {
         statusEl.innerHTML = '';
     }
+
+    // --- LÓGICA DO TRAILER COM FALLBACK PARA INGLÊS ---
+    let videos = m.videos?.results || [];
+    
+    // Se o TMDB não tiver vídeos cadastrados em pt-BR, busca na linguagem original
+    if (videos.length === 0) {
+        const fallbackVideos = await fetchTMDB(`/movie/${id}/videos`, {});
+        videos = fallbackVideos.results || [];
+    }
+    
+    // Pega o primeiro trailer do YouTube (ou qualquer vídeo do YT se não achar trailer)
+    const trailer = videos.find(v => v.site === 'YouTube' && v.type === 'Trailer') || videos.find(v => v.site === 'YouTube');
+    const trailerDiv = document.getElementById('trailerContainer');
+    
+    if (trailer) {
+        trailerDiv.style.display = 'block';
+        document.getElementById('btnTrailer').onclick = () => openTrailer(trailer.key);
+    } else {
+        trailerDiv.style.display = 'none';
+    }
+    // --------------------------------------------------
 
     const castEl = document.getElementById('movieCast');
     castEl.innerHTML = '';
@@ -181,6 +203,20 @@ function closeMovie() {
     window.scrollTo({ top: 0, behavior: 'smooth' });
 }
 
+// ---- FUNÇÕES NOVAS DO TRAILER ----
+function openTrailer(key) {
+    window.open(`https://www.youtube.com/watch?v=${key}`, '_blank');
+}
+
+function closeTrailer() {
+    const modal = document.getElementById('trailerModal');
+    const iframe = document.getElementById('trailerIframe');
+    iframe.src = ''; // Limpa o iframe para parar o som do vídeo
+    modal.style.display = 'none';
+    document.body.style.overflow = 'auto';
+}
+// ----------------------------------
+
 async function showActorPortfolio(id, name, pic) {
     const data = await fetchTMDB(`/person/${id}/movie_credits`, { language: 'pt-BR' });
     const details = await fetchTMDB(`/person/${id}`, { language: 'pt-BR' });
@@ -214,8 +250,10 @@ function closePortfolio() {
     document.body.style.overflow = 'auto';
 }
 
+// Adicionado o fechamento do trailer ao clicar fora
 window.onclick = (event) => {
     if (event.target == document.getElementById('portfolioModal')) closePortfolio();
+    if (event.target == document.getElementById('trailerModal')) closeTrailer();
 }
 
 loadGenres();
