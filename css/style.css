@@ -409,6 +409,22 @@ footer img { width: 80px; margin-top: 10px; opacity: 0.6; }
     .movie-info { padding: 25px; }
     .movie-title { font-size: 1.8rem; }
     .poster-wrap img { aspect-ratio: 2/3; }
+    .search-box {
+        flex-direction: column;
+    }
+    .search-box .main-btn {
+        width: 100%;
+        justify-content: center;
+    }
+    #actionButtons {
+        flex-direction: column;
+    }
+    #actionButtons .main-btn,
+    #actionButtons #trailerContainer,
+    #actionButtons #trailerContainer .main-btn {
+        width: 100%;
+        justify-content: center;
+    }
 }
 #trailerModal {
     display: none;
@@ -456,4 +472,37 @@ footer img { width: 80px; margin-top: 10px; opacity: 0.6; }
     background: #dc2626 !important;
     transform: translateY(-2px);
     box-shadow: 0 5px 15px rgba(220, 38, 38, 0.4) !important;
+}
+
+.remove-watchlist-btn {
+    position: absolute;
+    bottom: 38px;
+    right: 8px;
+    background: rgba(239,68,68,0.85);
+    border: none;
+    color: white;
+    border-radius: 50%;
+    width: 26px;
+    height: 26px;
+    font-size: 0.75rem;
+    cursor: pointer;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    transition: .2s;
+    backdrop-filter: blur(4px);
+}
+.remove-watchlist-btn:hover {
+    background: var(--danger);
+    transform: scale(1.15);
+}
+#tmdbLink:hover {
+    color: var(--accent) !important;
+}
+#movieStatus {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    flex-wrap: wrap;
+    margin-bottom: 20px;
 }
