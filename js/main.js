@@ -7,6 +7,8 @@ let currentTrendingPage = 1;
 let currentSearchPage = 1;
 let currentActorPage = 1;
 let currentMovieData = null;
+let currentShowPage = 1;
+let currentShowSearchPage = 1;
 
 function enableDragScroll(el) {
     let isDown = false; let startX; let scrollLeft;
@@ -25,12 +27,17 @@ async function fetchTMDB(path, params = {}) {
     return r.json();
 }
 
+function toggleMenu() { document.body.classList.toggle('menu-open'); }
+function closeMenu()  { document.body.classList.remove('menu-open'); }
+
 function switchTab(t) {
     document.querySelectorAll('.panel, .tab-btn').forEach(el => el.classList.remove('active'));
     document.getElementById(t + 'Panel').classList.add('active');
     document.getElementById('btn-' + t).classList.add('active');
     if (t === 'trending' && currentTrendingPage === 1) loadTrending();
+    if (t === 'shows' && currentShowPage === 1) loadTrendingShows();
     if (t === 'watchlist') loadWatchlistPanel();
+    closeMenu(); // fecha o menu lateral ao navegar
 }
 
 async function loadGenres() {
@@ -322,6 +329,118 @@ function removeFromWatchlist(id) {
         updateWatchlistBtn(id);
     }
 }
+
+// ── SÉRIES EM ALTA ──────────────────────────────────────────────────────────
+
+async function loadTrendingShows(append = false) {
+    if (!append) currentShowPage = 1;
+    else currentShowPage++;
+    const d = await fetchTMDB('/trending/tv/week', { language: 'pt-BR', page: currentShowPage });
+    renderShowGrid(d.results, 'showsResults', append);
+}
+
+async function searchShows(append = false) {
+    const q = document.getElementById('showQuery').value;
+    if (!q) return;
+    if (!append) currentShowSearchPage = 1;
+    else currentShowSearchPage++;
+    const d = await fetchTMDB('/search/tv', { language: 'pt-BR', query: q, page: currentShowSearchPage });
+    renderShowGrid(d.results, 'showSearchResults', append);
+    document.getElementById('loadMoreShowSearch').style.display = d.total_pages > currentShowSearchPage ? 'flex' : 'none';
+}
+
+function renderShowGrid(shows, targetId, append) {
+    const el = document.getElementById(targetId);
+    if (!append) el.innerHTML = '';
+    shows.forEach(s => {
+        const div = document.createElement('div');
+        div.className = 'result-item';
+        div.innerHTML = `<div class="rating-tag">★ ${(s.vote_average || 0).toFixed(1)}</div><img src="${s.poster_path ? IMG + s.poster_path : 'img/404.png'}"><p>${s.name}</p>`;
+        div.onclick = () => showSeries(s.id);
+        el.appendChild(div);
+    });
+}
+
+async function showSeries(id) {
+    const s = await fetchTMDB(`/tv/${id}`, { language: 'pt-BR', append_to_response: 'watch/providers,credits,videos' });
+    const card = document.getElementById('movieCard');
+    card.style.display = 'block';
+
+    document.getElementById('movieTitle').textContent = s.name;
+    document.getElementById('movieRating').innerHTML = '<i class="fas fa-star" style="color:#fbbf24"></i> ' + (s.vote_average || 0).toFixed(1);
+    document.getElementById('movieYear').textContent = s.first_air_date ? s.first_air_date.slice(0, 4) : '-';
+    document.getElementById('movieOverview').textContent = s.overview || 'Sinopse indisponível.';
+    document.getElementById('posterWrap').innerHTML = `<img src="${s.poster_path ? IMG + s.poster_path : 'img/404.png'}">`;
+    document.getElementById('movieGenres').innerHTML = (s.genres || []).map(g => `<span class="meta-item genre-tag">${g.name}</span>`).join('');
+    document.getElementById('tmdbLink').href = `https://www.themoviedb.org/tv/${id}`;
+
+    // Badge de temporadas/episódios
+    const statusEl = document.getElementById('movieStatus');
+    const oldBadge = statusEl.querySelector('.status-badge');
+    if (oldBadge) oldBadge.remove();
+    const seasons = s.number_of_seasons || 0;
+    const episodes = s.number_of_episodes || 0;
+    const statusText = s.status === 'Ended' || s.status === 'Canceled' ? 'Encerrada' : 'Em andamento';
+    statusEl.insertAdjacentHTML('afterbegin',
+        `<div class="status-badge future"><i class="fas fa-tv"></i> ${seasons} temp. · ${episodes} ep.</div>` +
+        `<div class="status-badge ${s.status === 'Ended' || s.status === 'Canceled' ? 'cinema' : 'future'}"><i class="fas fa-circle-dot"></i> ${statusText}</div>`
+    );
+
+    // Trailer
+    const videos = s.videos?.results || [];
+    const trailer = videos.find(v => v.site === 'YouTube' && v.type === 'Trailer') || videos.find(v => v.site === 'YouTube');
+    const trailerDiv = document.getElementById('trailerContainer');
+    if (trailer) {
+        trailerDiv.style.display = 'inline-flex';
+        document.getElementById('btnTrailer').onclick = () => openTrailer(trailer.key);
+    } else {
+        trailerDiv.style.display = 'none';
+    }
+
+    // Elenco
+    const castEl = document.getElementById('movieCast');
+    castEl.innerHTML = '';
+    const cast = s.credits?.cast || [];
+    document.getElementById('castSection').style.display = cast.length ? 'block' : 'none';
+    cast.slice(0, 15).forEach(person => {
+        const div = document.createElement('div');
+        div.className = 'cast-item';
+        div.innerHTML = `<img src="${person.profile_path ? IMG + person.profile_path : 'img/404.png'}"><span class="cast-name">${person.name}</span><span class="cast-role">${person.character || person.roles?.[0]?.character || ''}</span>`;
+        div.onclick = () => showActorPortfolio(person.id, person.name, person.profile_path);
+        castEl.appendChild(div);
+    });
+    enableDragScroll(castEl);
+
+    // Onde assistir
+    const wp = document.getElementById('watchProviders');
+    wp.innerHTML = '';
+    const br = s['watch/providers']?.results?.BR || {};
+    const link = br.link || `https://www.themoviedb.org/tv/${id}/watch?locale=BR`;
+    const providers = [...(br.flatrate || []), ...(br.rent || []), ...(br.buy || [])];
+    const uniquePr = Array.from(new Set(providers.map(p => p.provider_id))).map(pid => providers.find(p => p.provider_id === pid));
+    if (uniquePr.length > 0) {
+        uniquePr.forEach(p => {
+            const a = document.createElement('a');
+            a.className = 'provider';
+            a.href = link;
+            a.target = '_blank';
+            a.innerHTML = `<img src="${LOGO + p.logo_path}"><span class="provider-name">${p.provider_name}</span>`;
+            wp.appendChild(a);
+        });
+    } else {
+        wp.innerHTML = `<div class="no-providers"><i class="fas fa-info-circle"></i> Não disponível em streaming no Brasil no momento.</div>`;
+    }
+
+    // Sem "similares" no card de série — esconde a seção
+    document.getElementById('similarSection').style.display = 'none';
+
+    currentMovieData = { id: s.id, title: s.name, poster_path: s.poster_path, vote_average: s.vote_average };
+    updateWatchlistBtn(s.id);
+
+    card.scrollIntoView({ behavior: 'smooth', block: 'start' });
+}
+
+// ── FIM SÉRIES ───────────────────────────────────────────────────────────────
 
 loadGenres();
 loadTrending();
