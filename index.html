@@ -14,49 +14,60 @@
 
 <body>
 
+    <!-- Overlay do menu mobile -->
+    <div id="menuOverlay" onclick="closeMenu()"></div>
+
+    <!-- Botão hambúrguer (só mobile) -->
+    <button id="menuToggle" onclick="toggleMenu()" aria-label="Menu">
+        <span></span><span></span><span></span>
+    </button>
+
     <div class="container">
 
-        <h1>
-            <i class="fas fa-shuffle"></i>
-            Cine Explorador
-        </h1>
+        <div class="site-header">
+            <h1>
+                <i class="fas fa-film"></i>
+                Cine Explorador
+            </h1>
+            <p class="site-subtitle">Descubra seu próximo filme favorito</p>
+        </div>
 
         <!-- Tabs -->
         <div class="tabs">
 
-            <button
-                class="tab-btn active"
-                id="btn-trending"
-                onclick="switchTab('trending')">
-                Em Alta
+            <button class="tab-btn active" id="btn-trending" onclick="switchTab('trending')">
+                <i class="fas fa-fire"></i>
+                <span>Em Alta</span>
             </button>
 
-            <button
-                class="tab-btn"
-                id="btn-sort"
-                onclick="switchTab('sort')">
-                Sortear
+            <button class="tab-btn" id="btn-sort" onclick="switchTab('sort')">
+                <i class="fas fa-shuffle"></i>
+                <span>Sortear</span>
             </button>
 
-            <button
-                class="tab-btn"
-                id="btn-search"
-                onclick="switchTab('search')">
-                Filmes
+            <button class="tab-btn" id="btn-search" onclick="switchTab('search')">
+                <i class="fas fa-magnifying-glass"></i>
+                <span>Filmes</span>
             </button>
 
-            <button
-                class="tab-btn"
-                id="btn-actors"
-                onclick="switchTab('actors')">
-                Atores
+            <button class="tab-btn" id="btn-actors" onclick="switchTab('actors')">
+                <i class="fas fa-user-group"></i>
+                <span>Atores</span>
             </button>
 
-            <button
-                class="tab-btn"
-                id="btn-watchlist"
-                onclick="switchTab('watchlist')">
-                ⏰ Mais Tarde
+            <button class="tab-btn" id="btn-shows" onclick="switchTab('shows')">
+                <i class="fas fa-tv"></i>
+                <span>Séries</span>
+            </button>
+
+            <button class="tab-btn" id="btn-showsearch" onclick="switchTab('showsearch')">
+                <i class="fas fa-magnifying-glass-plus"></i>
+                <span>Buscar Séries</span>
+            </button>
+
+            <button class="tab-btn" id="btn-watchlist" onclick="switchTab('watchlist')">
+                <i class="fas fa-bookmark"></i>
+                <span>Mais Tarde</span>
             </button>
 
         </div>
@@ -184,6 +195,44 @@
 
                 </button>
 
+            </div>
+
+        </div>
+
+        <!-- Painel Séries em Alta -->
+        <div id="showsPanel" class="panel">
+
+            <div id="showsResults" class="results-list"></div>
+
+            <div class="load-more">
+                <button class="load-more-btn" onclick="loadTrendingShows(true)">
+                    Carregar Mais Séries
+                </button>
+            </div>
+
+        </div>
+
+        <!-- Painel Buscar Séries -->
+        <div id="showsearchPanel" class="panel">
+
+            <div class="search-box">
+                <input
+                    type="text"
+                    id="showQuery"
+                    placeholder="Buscar séries..."
+                    onkeyup="if(event.key==='Enter'){ currentShowSearchPage=1; searchShows(); }">
+                <button class="main-btn" onclick="currentShowSearchPage=1; searchShows()">
+                    <i class="fas fa-search"></i>
+                    Buscar
+                </button>
+            </div>
+
+            <div id="showSearchResults" class="results-list"></div>
+
+            <div id="loadMoreShowSearch" class="load-more" style="display:none">
+                <button class="load-more-btn" onclick="searchShows(true)">
+                    Carregar Mais
+                </button>
             </div>
 
         </div>
